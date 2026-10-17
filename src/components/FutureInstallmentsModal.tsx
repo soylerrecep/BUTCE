@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Calendar, 
@@ -38,13 +38,11 @@ export const FutureInstallmentsModal: React.FC<FutureInstallmentsModalProps> = (
   onSavePlans,
   onNavigateToMonth
 }) => {
-  if (!isOpen || !card) return null;
-
   const [activeTab, setActiveTab] = useState<'months' | 'distributor'>('months');
 
   // Local state for plans: monthKey -> { statementAmount, minimumPayment, note }
   const [plans, setPlans] = useState<Record<string, CardMonthlyPlan>>(() => {
-    return card.monthlyPlans ? { ...card.monthlyPlans } : {};
+    return card?.monthlyPlans ? { ...card.monthlyPlans } : {};
   });
 
   // Generator form state
@@ -57,6 +55,15 @@ export const FutureInstallmentsModal: React.FC<FutureInstallmentsModalProps> = (
     return currentSelectedMonthKey || '2026-08';
   });
   const [saveSuccessNotice, setSaveSuccessNotice] = useState<string | null>(null);
+
+  // Sync plans whenever card or isOpen changes
+  useEffect(() => {
+    if (isOpen && card) {
+      setPlans(card.monthlyPlans ? { ...card.monthlyPlans } : {});
+      setStartMonth(currentSelectedMonthKey || '2026-08');
+      setSaveSuccessNotice(null);
+    }
+  }, [card, isOpen, currentSelectedMonthKey]);
 
   // Generate list of 12 upcoming months from base/selected
   const upcomingMonths = React.useMemo(() => {
@@ -82,6 +89,8 @@ export const FutureInstallmentsModal: React.FC<FutureInstallmentsModalProps> = (
     }
     return list;
   }, [currentSelectedMonthKey]);
+
+  if (!isOpen || !card) return null;
 
   // Handle direct row edits
   const handleAmountChange = (mKey: string, valStr: string) => {

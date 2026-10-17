@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 interface MonthPickerModalProps {
@@ -21,10 +21,17 @@ export const MonthPickerModal: React.FC<MonthPickerModalProps> = ({
   onSelectMonth,
   scheduledMonths = []
 }) => {
-  if (!isOpen) return null;
-
-  const [selectedYearStr, selectedMonthStr] = selectedMonthKey.split('-');
+  const [selectedYearStr, selectedMonthStr] = (selectedMonthKey || '2026-08').split('-');
   const [viewYear, setViewYear] = useState<number>(parseInt(selectedYearStr, 10) || 2026);
+
+  useEffect(() => {
+    if (isOpen) {
+      const [yStr] = (selectedMonthKey || '2026-08').split('-');
+      setViewYear(parseInt(yStr, 10) || 2026);
+    }
+  }, [isOpen, selectedMonthKey]);
+
+  if (!isOpen) return null;
 
   const selectedMonthNum = parseInt(selectedMonthStr, 10); // 1-12
 

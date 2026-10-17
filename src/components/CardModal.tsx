@@ -36,6 +36,11 @@ const THEME_OPTIONS: { id: CardTheme; name: string; bg: string }[] = [
   { id: 'dark', name: 'Siyah', bg: 'bg-slate-900' }
 ];
 
+const MONTH_NAMES = [
+  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+];
+
 export const CardModal: React.FC<CardModalProps> = ({
   isOpen,
   onClose,
@@ -59,6 +64,35 @@ export const CardModal: React.FC<CardModalProps> = ({
   const [minimumPayment, setMinimumPayment] = useState<string>('');
   const [minPayPercent, setMinPayPercent] = useState<number | 'custom'>(20);
   const [notes, setNotes] = useState('');
+
+  // Always generate upcoming month options unconditionally (Rules of Hooks)
+  const upcomingMonthOptions = React.useMemo(() => {
+    const list: { key: string; label: string }[] = [];
+    const [startYearStr, startMonthStr] = (currentSelectedMonthKey || '2026-08').split('-');
+    let curYear = parseInt(startYearStr, 10) || 2026;
+    let curMonth = parseInt(startMonthStr, 10) || 8;
+
+    for (let i = 0; i < 12; i++) {
+      const monthKey = `${curYear}-${curMonth.toString().padStart(2, '0')}`;
+      list.push({
+        key: monthKey,
+        label: `${MONTH_NAMES[curMonth - 1]} ${curYear}`
+      });
+
+      curMonth++;
+      if (curMonth > 12) {
+        curMonth = 1;
+        curYear++;
+      }
+    }
+    return list;
+  }, [currentSelectedMonthKey]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTargetMonthKey(currentSelectedMonthKey || '2026-08');
+    }
+  }, [isOpen, currentSelectedMonthKey]);
 
   useEffect(() => {
     const now = new Date();
@@ -131,33 +165,6 @@ export const CardModal: React.FC<CardModalProps> = ({
       setMinimumPayment(Math.round((val * pct) / 100).toString());
     }
   };
-
-  const MONTH_NAMES = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-  ];
-
-  const upcomingMonthOptions = React.useMemo(() => {
-    const list: { key: string; label: string }[] = [];
-    const [startYearStr, startMonthStr] = (currentSelectedMonthKey || '2026-08').split('-');
-    let curYear = parseInt(startYearStr, 10) || 2026;
-    let curMonth = parseInt(startMonthStr, 10) || 8;
-
-    for (let i = 0; i < 12; i++) {
-      const monthKey = `${curYear}-${curMonth.toString().padStart(2, '0')}`;
-      list.push({
-        key: monthKey,
-        label: `${MONTH_NAMES[curMonth - 1]} ${curYear}`
-      });
-
-      curMonth++;
-      if (curMonth > 12) {
-        curMonth = 1;
-        curYear++;
-      }
-    }
-    return list;
-  }, [currentSelectedMonthKey]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
