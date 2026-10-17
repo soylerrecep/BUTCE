@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient (Full bleed) -->
+    <linearGradient id="mBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+
+    <!-- Emerald Glow -->
+    <radialGradient id="mGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Card Gradient 1 (Back Card) -->
+    <linearGradient id="mCardBackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+
+    <!-- Card Gradient 2 (Front Card) -->
+    <linearGradient id="mCardFrontGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+
+    <!-- Gold Accent Gradient -->
+    <linearGradient id="mGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+
+    <filter id="mShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <filter id="mSoftShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Full bleed background for maskable (Android clips to circles/squircles) -->
+  <rect width="512" height="512" fill="url(#mBgGrad)" />
+  <rect width="512" height="512" fill="url(#mGlow)" />
+
+  <!-- All elements scaled and centered within the 80% safe zone -->
+  <g transform="translate(256, 256) scale(0.82) translate(-256, -256)">
+    <!-- Back Card (Blue / Credit) tilted slightly -->
+    <g transform="translate(256, 230) rotate(-10) translate(-256, -230)" filter="url(#mShadow)">
+      <rect x="116" y="145" width="280" height="170" rx="20" fill="url(#mCardBackGrad)" opacity="0.9" />
+      <rect x="116" y="180" width="280" height="32" fill="#1e3a8a" opacity="0.5" />
+      <rect x="145" y="235" width="36" height="26" rx="6" fill="#93c5fd" opacity="0.8" />
+    </g>
+
+    <!-- Front Card (Emerald / Budget & Balance) -->
+    <g filter="url(#mShadow)">
+      <rect x="116" y="200" width="280" height="175" rx="22" fill="url(#mCardFrontGrad)" stroke="#6ee7b7" stroke-width="1.5" stroke-opacity="0.4" />
+      <rect x="148" y="235" width="46" height="34" rx="7" fill="url(#mGoldGrad)" filter="url(#mSoftShadow)" />
+      <path d="M148 252 h46 M171 235 v34" stroke="#b45309" stroke-width="1.5" opacity="0.6" />
+
+      <!-- Contactless icon waves -->
+      <path d="M210 242 a 12 12 0 0 1 0 20 M216 237 a 18 18 0 0 1 0 30" fill="none" stroke="#a7f3d0" stroke-width="2.5" stroke-linecap="round" />
+
+      <!-- Card number dots -->
+      <circle cx="152" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+      <circle cx="164" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+      <circle cx="176" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+      <circle cx="188" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+
+      <text x="360" y="348" text-anchor="end" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ecfdf5" letter-spacing="1">BÜTÇE</text>
+    </g>
+
+    <!-- Golden Currency & Growth Badge -->
+    <g filter="url(#mShadow)" transform="translate(325, 290)">
+      <circle cx="50" cy="50" r="48" fill="url(#mGoldGrad)" stroke="#fef3c7" stroke-width="3" />
+      <circle cx="50" cy="50" r="40" fill="#d97706" opacity="0.2" />
+      <text x="50" y="65" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="#78350f">₺</text>
+      <polygon points="80,22 84,28 90,30 84,32 80,38 76,32 70,30 76,28" fill="#ffffff" opacity="0.9" />
+    </g>
+
+    <!-- Financial Trend Upward Arrow indicator on top right -->
+    <g filter="url(#mSoftShadow)" transform="translate(350, 105)">
+      <circle cx="28" cy="28" r="28" fill="#10b981" />
+      <path d="M18 36 L34 20 M24 20 H34 V30" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+</svg>

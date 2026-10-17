@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+
+    <!-- Emerald Glow -->
+    <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Card Gradient 1 (Back Card) -->
+    <linearGradient id="cardBackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+
+    <!-- Card Gradient 2 (Front Card) -->
+    <linearGradient id="cardFrontGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+
+    <!-- Gold Accent Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle for standard icon -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="512" height="512" rx="112" fill="url(#glow)" />
+  
+  <!-- Subtle border highlight -->
+  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="#34d399" stroke-width="2.5" stroke-opacity="0.25" />
+
+  <!-- Back Card (Blue / Credit) tilted slightly -->
+  <g transform="translate(256, 230) rotate(-10) translate(-256, -230)" filter="url(#shadow)">
+    <rect x="116" y="145" width="280" height="170" rx="20" fill="url(#cardBackGrad)" opacity="0.9" />
+    <!-- Magnetic strip or design line -->
+    <rect x="116" y="180" width="280" height="32" fill="#1e3a8a" opacity="0.5" />
+    <!-- Chip -->
+    <rect x="145" y="235" width="36" height="26" rx="6" fill="#93c5fd" opacity="0.8" />
+  </g>
+
+  <!-- Front Card (Emerald / Budget & Balance) -->
+  <g filter="url(#shadow)">
+    <rect x="116" y="200" width="280" height="175" rx="22" fill="url(#cardFrontGrad)" stroke="#6ee7b7" stroke-width="1.5" stroke-opacity="0.4" />
+    <!-- EMV Chip with microcircuit styling -->
+    <rect x="148" y="235" width="46" height="34" rx="7" fill="url(#goldGrad)" filter="url(#softShadow)" />
+    <path d="M148 252 h46 M171 235 v34" stroke="#b45309" stroke-width="1.5" opacity="0.6" />
+
+    <!-- Contactless icon waves -->
+    <path d="M210 242 a 12 12 0 0 1 0 20 M216 237 a 18 18 0 0 1 0 30" fill="none" stroke="#a7f3d0" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Card number dots & balance pill -->
+    <circle cx="152" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+    <circle cx="164" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+    <circle cx="176" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+    <circle cx="188" cy="305" r="4" fill="#a7f3d0" opacity="0.8" />
+
+    <text x="360" y="348" text-anchor="end" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#ecfdf5" letter-spacing="1">BÜTÇE</text>
+  </g>
+
+  <!-- Golden Currency & Growth Badge (Bottom-Right / Floating) -->
+  <g filter="url(#shadow)" transform="translate(325, 290)">
+    <!-- Outer Gold Ring -->
+    <circle cx="50" cy="50" r="48" fill="url(#goldGrad)" stroke="#fef3c7" stroke-width="3" />
+    <circle cx="50" cy="50" r="40" fill="#d97706" opacity="0.2" />
+    
+    <!-- ₺ Turkish Lira / Currency Symbol -->
+    <text x="50" y="65" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="#78350f">₺</text>
+    
+    <!-- Tiny sparkle -->
+    <polygon points="80,22 84,28 90,30 84,32 80,38 76,32 70,30 76,28" fill="#ffffff" opacity="0.9" />
+  </g>
+
+  <!-- Financial Trend Upward Arrow indicator on top right -->
+  <g filter="url(#softShadow)" transform="translate(350, 105)">
+    <circle cx="28" cy="28" r="28" fill="#10b981" />
+    <path d="M18 36 L34 20 M24 20 H34 V30" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

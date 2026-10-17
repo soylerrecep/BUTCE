@@ -1,0 +1,6 @@
+{
+  "name": "Kredi & Borç Takip",
+  "description": "Kredi kartı ekstreleri, kredi taksitleri, borçlar ve parça parça tahsilat yapılabilen bağımsız alacak takip sistemi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
