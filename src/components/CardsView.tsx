@@ -303,6 +303,24 @@ export const CardsView: React.FC<CardsViewProps> = ({
                   </div>
                 </div>
 
+                {/* Devreden Kısmi Ödeme Bilgilendirmesi */}
+                {card.carriedOverAmount && card.carriedOverAmount > 0 && (
+                  <div className="mb-3 bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-transparent backdrop-blur-md p-2.5 rounded-2xl border border-amber-300/40 text-xs text-white">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-200 flex items-center gap-1">
+                        <span>Önceki Aydan Devreden (Kısmi Ödeme):</span>
+                      </span>
+                      <span className="font-black text-amber-300">+{formatCurrency(card.carriedOverAmount)}</span>
+                    </div>
+                    {card.plannedAmountOnly !== undefined && card.plannedAmountOnly > 0 && (
+                      <div className="flex items-center justify-between text-[11px] text-white/80 pt-1.5 mt-1.5 border-t border-white/10">
+                        <span>Bu Ayki Planlı Tutar:</span>
+                        <span className="font-bold text-white">{formatCurrency(card.plannedAmountOnly)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Partial Payment Highlight Box */}
                 {card.isPartialPaidThisMonth && card.paidAmountThisMonth !== undefined && (
                   <div className="mb-3 bg-amber-500/20 backdrop-blur-md p-2.5 rounded-2xl border border-amber-400/30 flex justify-between items-center text-xs text-white">

@@ -26,6 +26,8 @@ export interface CreditCard {
   createdAt: string;
   monthlyPlans?: Record<string, CardMonthlyPlan>; // Gelecek aylar için girilmiş taksit ve ekstreler (örn: "2026-12" -> { statementAmount: 3500, note: "Telefon Taksiti" })
   startMonthKey?: string;
+  carriedOverAmount?: number; // Önceki aydan devreden bakiye (kısmi ödeme kalanı)
+  plannedAmountOnly?: number; // Bu aya ait saf planlı tutar (devir hariç)
 }
 
 export interface Loan {

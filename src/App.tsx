@@ -192,6 +192,8 @@ export default function App() {
       statementAmount: number;
       minimumPayment: number;
       minPayRatio: number;
+      carriedOverAmount?: number;
+      plannedAmountOnly?: number;
     }>();
 
     cards.forEach(c => {
@@ -204,7 +206,9 @@ export default function App() {
       cardStates.set(c.id, {
         statementAmount: initialStmt,
         minimumPayment: initialMin,
-        minPayRatio: minRatio
+        minPayRatio: minRatio,
+        carriedOverAmount: undefined,
+        plannedAmountOnly: overrideStmt
       });
     });
 
@@ -238,29 +242,76 @@ export default function App() {
 
       // If not the first month, apply carryover from previous month first
       if (i > 0) {
-        // 1) Credit Cards Carryover
-        cards.forEach(c => {
-          const prevKey = monthList[i - 1];
-          const state = cardStates.get(c.id)!;
-          const status = monthlyPayments[prevKey]?.[c.id];
-          const isPaid = status ? status.isPaid : false;
-          const isPartial = status ? !!status.isPartial : false;
-          const paidAmount = status ? (status.paidAmount || 0) : 0;
+        const prevKey = monthList[i - 1];
 
-          let unpaidBalance = state.statementAmount;
+        // 1) Credit Cards Carryover & Planned Addition
+        cards.forEach(c => {
+          const prevState = cardStates.get(c.id)!;
+          const prevStatus = monthlyPayments[prevKey]?.[c.id];
+          const isPaid = prevStatus !== undefined ? prevStatus.isPaid : (prevKey === BASE_MONTH ? !!c.isPaidThisMonth : false);
+          const isPartial = prevStatus !== undefined ? !!prevStatus.isPartial : (prevKey === BASE_MONTH ? !!c.isPartialPaidThisMonth : false);
+          const paidAmount = prevStatus !== undefined ? (prevStatus.paidAmount || 0) : (prevKey === BASE_MONTH ? (c.paidAmountThisMonth || 0) : 0);
+
+          let carriedOverFromPrev = 0;
           if (isPaid && !isPartial) {
-            unpaidBalance = 0; // Fully paid
+            // Tam ödendi -> devir yok
+            carriedOverFromPrev = 0;
           } else if (isPartial) {
-            unpaidBalance = Math.max(0, state.statementAmount - paidAmount); // Remaining unpaid balance carries over
+            // Kısmi ödeme yapıldı -> kalan tutar gelecek aya devredilir
+            carriedOverFromPrev = Math.max(0, prevState.statementAmount - paidAmount);
           } else {
-            unpaidBalance = state.statementAmount; // Whole balance carries over
+            // Ödenmedi
+            carriedOverFromPrev = prevState.statementAmount;
           }
 
-          const nextMinPay = Math.round(unpaidBalance * state.minPayRatio);
+          // Gelecek ay (mKey) için girilmiş planlı taksit / ekstre kontrolü
+          const plannedStmt = monthlyPayments[mKey]?.[c.id]?.statementAmount ?? c.monthlyPlans?.[mKey]?.statementAmount;
+          const plannedMin = monthlyPayments[mKey]?.[c.id]?.minimumPayment ?? c.monthlyPlans?.[mKey]?.minimumPayment;
+
+          let finalStmt = 0;
+          let finalMin = 0;
+          let carriedOverAmount: number | undefined = undefined;
+          let plannedAmountOnly: number | undefined = undefined;
+
+          if (plannedStmt !== undefined) {
+            plannedAmountOnly = plannedStmt;
+            // Kısmi ödeme yapıldıysa ve kalan tutar devrediyorsa, planlı ödemenin üzerine ekle
+            if (isPartial && carriedOverFromPrev > 0) {
+              carriedOverAmount = carriedOverFromPrev;
+              finalStmt = plannedStmt + carriedOverFromPrev;
+
+              const minRatio = plannedStmt > 0 
+                ? ((plannedMin !== undefined ? plannedMin : Math.round(plannedStmt * prevState.minPayRatio)) / plannedStmt) 
+                : prevState.minPayRatio;
+              const plannedMinPart = plannedMin !== undefined ? plannedMin : Math.round(plannedStmt * minRatio);
+              const carriedMinPart = Math.round(carriedOverFromPrev * prevState.minPayRatio);
+              finalMin = plannedMinPart + carriedMinPart;
+            } else {
+              // Kısmi ödeme kalanı yoksa veya tam ödendiyse doğrudan planlanan tutarı kullan
+              finalStmt = plannedStmt;
+              finalMin = plannedMin !== undefined ? plannedMin : Math.round(plannedStmt * prevState.minPayRatio);
+            }
+          } else {
+            // Gelecek ay için özel planlı tutar girilmemişse
+            if (isPartial && carriedOverFromPrev > 0) {
+              carriedOverAmount = carriedOverFromPrev;
+              finalStmt = carriedOverFromPrev;
+              finalMin = Math.round(carriedOverFromPrev * prevState.minPayRatio);
+            } else if (isPaid && !isPartial) {
+              finalStmt = 0;
+              finalMin = 0;
+            } else {
+              finalStmt = carriedOverFromPrev;
+              finalMin = Math.round(carriedOverFromPrev * prevState.minPayRatio);
+            }
+          }
+
           cardStates.set(c.id, {
-            statementAmount: unpaidBalance,
-            minimumPayment: nextMinPay,
-            minPayRatio: state.minPayRatio
+            statementAmount: finalStmt,
+            minimumPayment: finalMin,
+            minPayRatio: finalStmt > 0 ? (finalMin / finalStmt) : prevState.minPayRatio,
+            carriedOverAmount,
+            plannedAmountOnly
           });
         });
 
@@ -269,7 +320,7 @@ export default function App() {
           const prevKey = monthList[i - 1];
           const state = loanStates.get(l.id)!;
           const status = monthlyPayments[prevKey]?.[l.id];
-          const isPaid = status ? status.isPaid : false;
+          const isPaid = status !== undefined ? status.isPaid : (prevKey === BASE_MONTH ? l.isPaidThisMonth : false);
 
           if (isPaid) {
             const nextRem = Math.max(0, state.remainingInstallments - 1);
@@ -286,7 +337,7 @@ export default function App() {
           const prevKey = monthList[i - 1];
           const state = debtStates.get(d.id)!;
           const status = monthlyPayments[prevKey]?.[d.id];
-          const isPaid = status ? status.isPaid : false;
+          const isPaid = status !== undefined ? status.isPaid : (prevKey === BASE_MONTH ? d.isPaidThisMonth : false);
 
           if (d.isInstallment && state.remainingInstallments !== undefined) {
             if (isPaid) {
@@ -301,28 +352,18 @@ export default function App() {
         });
       }
 
-      // Apply explicit statement amount override or future planned installment for current mKey
-      cards.forEach(c => {
-        const plannedStmt = monthlyPayments[mKey]?.[c.id]?.statementAmount ?? c.monthlyPlans?.[mKey]?.statementAmount;
-        const plannedMin = monthlyPayments[mKey]?.[c.id]?.minimumPayment ?? c.monthlyPlans?.[mKey]?.minimumPayment;
-
-        if (plannedStmt !== undefined) {
-          const state = cardStates.get(c.id)!;
-          const minRatio = plannedStmt > 0 ? ((plannedMin !== undefined ? plannedMin : state.minimumPayment) / plannedStmt) : state.minPayRatio;
-          cardStates.set(c.id, {
-            statementAmount: plannedStmt,
-            minimumPayment: plannedMin !== undefined ? plannedMin : Math.round(plannedStmt * minRatio),
-            minPayRatio: minRatio
-          });
-        }
-      });
-
       const isTarget = (mKey === selectedMonthKey);
 
       if (isTarget) {
         // Build final display arrays for the target month
         const displayCardsRes: CreditCard[] = cards.map(c => {
-          const state = cardStates.get(c.id) || { statementAmount: c.statementAmount, minimumPayment: c.minimumPayment, minPayRatio: 0.2 };
+          const state = cardStates.get(c.id) || { 
+            statementAmount: c.statementAmount, 
+            minimumPayment: c.minimumPayment, 
+            minPayRatio: 0.2,
+            carriedOverAmount: undefined,
+            plannedAmountOnly: undefined
+          };
           const status = monthlyPayments[mKey]?.[c.id];
           const isPaid = status ? status.isPaid : (mKey === BASE_MONTH ? c.isPaidThisMonth : false);
           const isPartial = status ? !!status.isPartial : (mKey === BASE_MONTH ? !!c.isPartialPaidThisMonth : false);
@@ -336,6 +377,8 @@ export default function App() {
             isPaidThisMonth: isPaid,
             isPartialPaidThisMonth: isPartial,
             paidAmountThisMonth: paidAmount,
+            carriedOverAmount: state.carriedOverAmount,
+            plannedAmountOnly: state.plannedAmountOnly,
             notes: planNote ? (c.notes ? `${c.notes} • ${planNote}` : planNote) : c.notes
           };
         });
