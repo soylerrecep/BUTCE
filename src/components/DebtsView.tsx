@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReceiptText, Plus, CheckCircle2, Edit3, Trash2, User, Home, Zap, Tag, CalendarClock } from 'lucide-react';
+import { ReceiptText, Plus, CheckCircle2, Edit3, Trash2, User, Home, Zap, Tag, CalendarClock, CalendarPlus } from 'lucide-react';
 import { Debt, DebtCategory } from '../types';
 import { formatCurrency, getDueDateLabel } from '../utils/formatters';
 
@@ -9,6 +9,7 @@ interface DebtsViewProps {
   onOpenAddModal: () => void;
   onEditDebt: (debt: Debt) => void;
   onDeleteDebt: (id: string) => void;
+  onAddToCalendar?: (debt: Debt) => void;
 }
 
 export const DebtsView: React.FC<DebtsViewProps> = ({
@@ -16,7 +17,8 @@ export const DebtsView: React.FC<DebtsViewProps> = ({
   onTogglePaid,
   onOpenAddModal,
   onEditDebt,
-  onDeleteDebt
+  onDeleteDebt,
+  onAddToCalendar
 }) => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unpaid' | 'paid'>('all');
@@ -199,6 +201,19 @@ export const DebtsView: React.FC<DebtsViewProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-1">
+                    {onAddToCalendar && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddToCalendar(debt);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-emerald-500 transition cursor-pointer"
+                        title="Telefon Takvimine Ekle"
+                      >
+                        <CalendarPlus className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

@@ -24,9 +24,11 @@ import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { PaymentAdvisorModal } from './components/PaymentAdvisorModal';
 import { FutureInstallmentsModal } from './components/FutureInstallmentsModal';
+import { CalendarExportModal } from './components/CalendarExportModal';
 import { CardMonthlyPlan } from './types';
 import { usePWAInstall } from './hooks/usePWAInstall';
-import { getDaysRemaining, getPrevMonthKey, getNextMonthKey, getMonthDiff, getMonthsBetween } from './utils/formatters';
+import { getDaysRemaining, getPrevMonthKey, getNextMonthKey, getMonthDiff, getMonthsBetween, formatCurrency } from './utils/formatters';
+import { CalendarPaymentEvent } from './utils/calendarExport';
 import { generateRecommendations } from './utils/paymentAdvisor';
 
 export default function App() {
@@ -101,6 +103,7 @@ export default function App() {
   const [partialPaymentCard, setPartialPaymentCard] = useState<CreditCard | null>(null);
   const [isFuturePlansModalOpen, setIsFuturePlansModalOpen] = useState(false);
   const [futurePlansCard, setFuturePlansCard] = useState<CreditCard | null>(null);
+  const [calendarExportEvents, setCalendarExportEvents] = useState<CalendarPaymentEvent[]>([]);
 
   const { isInstalled } = usePWAInstall();
 
@@ -944,6 +947,7 @@ export default function App() {
               onOpenIncomeModal={() => setIsIncomeModalOpen(true)}
               onOpenAdvisor={() => handleOpenAdvisor()}
               selectedMonthKey={selectedMonthKey}
+              onOpenCalendar={(events) => setCalendarExportEvents(events)}
             />
           )}
 
@@ -967,6 +971,20 @@ export default function App() {
                 setIsFuturePlansModalOpen(true);
               }}
               currentSelectedMonthKey={selectedMonthKey}
+              onAddToCalendar={(c) =>
+                setCalendarExportEvents([
+                  {
+                    id: c.id,
+                    type: 'card',
+                    title: `${c.bankName} - ${c.cardName}`,
+                    amount: c.statementAmount,
+                    dueDay: c.dueDay,
+                    monthKey: selectedMonthKey,
+                    description: `Asgari: ${formatCurrency(c.minimumPayment)}${c.notes ? ` • ${c.notes}` : ''}`,
+                    isPaid: c.isPaidThisMonth
+                  }
+                ])
+              }
             />
           )}
 
@@ -984,6 +1002,20 @@ export default function App() {
               }}
               onDeleteLoan={handleDeleteLoan}
               onOpenAdvisor={(targetId) => handleOpenAdvisor(targetId)}
+              onAddToCalendar={(l) =>
+                setCalendarExportEvents([
+                  {
+                    id: l.id,
+                    type: 'loan',
+                    title: `${l.bankName} (${l.loanName})`,
+                    amount: l.monthlyInstallment,
+                    dueDay: l.paymentDay,
+                    monthKey: selectedMonthKey,
+                    description: `Kalan: ${l.remainingInstallments}/${l.totalInstallments} taksit`,
+                    isPaid: l.isPaidThisMonth
+                  }
+                ])
+              }
             />
           )}
 
@@ -1000,6 +1032,20 @@ export default function App() {
                 setIsDebtModalOpen(true);
               }}
               onDeleteDebt={handleDeleteDebt}
+              onAddToCalendar={(d) =>
+                setCalendarExportEvents([
+                  {
+                    id: d.id,
+                    type: 'debt',
+                    title: d.title,
+                    amount: d.monthlyAmount,
+                    dueDay: d.dueDay,
+                    monthKey: selectedMonthKey,
+                    description: d.creditor ? `Alacaklı: ${d.creditor}` : undefined,
+                    isPaid: d.isPaidThisMonth
+                  }
+                ])
+              }
             />
           )}
 
@@ -1149,6 +1195,13 @@ export default function App() {
           loans={displayLoans}
           debts={displayDebts}
           initialTargetId={advisorTargetId}
+        />
+
+        <CalendarExportModal
+          isOpen={calendarExportEvents.length > 0}
+          onClose={() => setCalendarExportEvents([])}
+          events={calendarExportEvents}
+          monthKey={selectedMonthKey}
         />
       </div>
     </div>

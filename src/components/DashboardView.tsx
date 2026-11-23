@@ -13,10 +13,12 @@ import {
   ArrowRight,
   PieChart as PieIcon,
   ChevronDown,
-  CalendarClock
+  CalendarClock,
+  CalendarPlus
 } from 'lucide-react';
 import { CreditCard, Loan, Debt, TabType } from '../types';
 import { formatCurrency, getDueDateLabel, getDaysRemaining, getMonthNameAndYear } from '../utils/formatters';
+import { CalendarPaymentEvent } from '../utils/calendarExport';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { PaymentAdvisorWidget } from './PaymentAdvisorWidget';
 
@@ -33,6 +35,7 @@ interface DashboardViewProps {
   onOpenIncomeModal: () => void;
   onOpenAdvisor?: () => void;
   selectedMonthKey?: string;
+  onOpenCalendar?: (events: CalendarPaymentEvent[]) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -47,7 +50,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   monthlyIncome,
   onOpenIncomeModal,
   onOpenAdvisor,
-  selectedMonthKey
+  selectedMonthKey,
+  onOpenCalendar
 }) => {
   // Collapsible state for Minimum Payment Scenario widget
   const [isMinScenarioExpanded, setIsMinScenarioExpanded] = useState<boolean>(() => {
@@ -494,14 +498,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Upcoming Payments List */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 gap-2">
           <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Clock className="w-4 h-4 text-emerald-500" />
-            Yaklaşan & Bekleyen Ödemeler
+            <span>Yaklaşan &amp; Bekleyen Ödemeler</span>
           </h2>
-          <span className="text-xs text-slate-500 font-medium">
-            {unpaidItems.length} Bekleyen
-          </span>
+          <div className="flex items-center gap-2">
+            {onOpenCalendar && allItems.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const mKey = selectedMonthKey || '2026-08';
+                  const events: CalendarPaymentEvent[] = allItems.map(item => ({
+                    id: item.id,
+                    type: item.type,
+                    title: item.title,
+                    amount: item.amount,
+                    dueDay: item.dueDay,
+                    monthKey: mKey,
+                    description: item.subDetail,
+                    isPaid: item.isPaid
+                  }));
+                  onOpenCalendar(events);
+                }}
+                className="px-2.5 py-1 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-[11px] font-bold flex items-center gap-1 transition active:scale-95"
+                title="Ödemeleri Google Takvim'e Ekle"
+              >
+                <CalendarPlus className="w-3.5 h-3.5" />
+                <span>Google Takvim</span>
+              </button>
+            )}
+            <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+              {unpaidItems.length} Bekleyen
+            </span>
+          </div>
         </div>
 
         {allItems.length === 0 ? (
@@ -525,22 +555,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               return (
                 <div
                   key={`${item.type}-${item.id}`}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between ${
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
                     item.isPaid
                       ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-75'
                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/80 shadow-sm'
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2.5 rounded-xl ${item.color}`}>
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className={`p-2.5 rounded-xl shrink-0 ${item.color}`}>
                       <Icon className="w-5 h-5" />
                     </div>
 
-                    <div>
-                      <h4 className={`text-sm font-bold ${item.isPaid ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'}`}>
+                    <div className="min-w-0">
+                      <h4 className={`text-sm font-bold truncate ${item.isPaid ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'}`}>
                         {item.title}
                       </h4>
-                      <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                           {item.subDetail}
                         </span>
@@ -551,28 +581,53 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end space-y-1">
+                  <div className="flex flex-col items-end space-y-1 shrink-0">
                     <span className="text-sm font-black text-slate-900 dark:text-white">
                       {formatCurrency(item.amount)}
                     </span>
 
-                    <button
-                      onClick={() => handleToggle(item.id, item.type)}
-                      className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 ${
-                        item.isPaid
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                          : 'bg-slate-900 text-white dark:bg-emerald-500 dark:text-slate-950 hover:opacity-90 active:scale-95'
-                      }`}
-                    >
-                      {item.isPaid ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                          <span>Ödendi</span>
-                        </>
-                      ) : (
-                        <span>Öde</span>
+                    <div className="flex items-center gap-1.5">
+                      {onOpenCalendar && !item.isPaid && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const mKey = selectedMonthKey || '2026-08';
+                            onOpenCalendar([{
+                              id: item.id,
+                              type: item.type,
+                              title: item.title,
+                              amount: item.amount,
+                              dueDay: item.dueDay,
+                              monthKey: mKey,
+                              description: item.subDetail,
+                              isPaid: item.isPaid
+                            }]);
+                          }}
+                          className="p-1.5 rounded-xl bg-slate-100 hover:bg-emerald-500/15 dark:bg-slate-700/70 dark:hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 transition active:scale-95"
+                          title="Telefon Takvimine Ekle"
+                        >
+                          <CalendarPlus className="w-3.5 h-3.5" />
+                        </button>
                       )}
-                    </button>
+
+                      <button
+                        onClick={() => handleToggle(item.id, item.type)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 ${
+                          item.isPaid
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                            : 'bg-slate-900 text-white dark:bg-emerald-500 dark:text-slate-950 hover:opacity-90 active:scale-95'
+                        }`}
+                      >
+                        {item.isPaid ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>Ödendi</span>
+                          </>
+                        ) : (
+                          <span>Öde</span>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

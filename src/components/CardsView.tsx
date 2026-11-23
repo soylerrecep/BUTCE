@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard as CardIcon, Plus, CheckCircle2, Edit3, Trash2, ShieldAlert, Sparkles, Filter, Percent, ArrowRight, Lightbulb, ChevronRight, CalendarClock } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, CheckCircle2, Edit3, Trash2, ShieldAlert, Sparkles, Filter, Percent, ArrowRight, Lightbulb, ChevronRight, CalendarClock, CalendarPlus } from 'lucide-react';
 import { CreditCard } from '../types';
 import { formatCurrency, getDueDateLabel, getCardColorStyle } from '../utils/formatters';
 
@@ -13,6 +13,7 @@ interface CardsViewProps {
   onOpenAdvisor?: (targetId?: string) => void;
   onOpenFuturePlans?: (card: CreditCard) => void;
   currentSelectedMonthKey?: string;
+  onAddToCalendar?: (card: CreditCard) => void;
 }
 
 export const CardsView: React.FC<CardsViewProps> = ({
@@ -24,7 +25,8 @@ export const CardsView: React.FC<CardsViewProps> = ({
   onOpenPartialPaymentModal,
   onOpenAdvisor,
   onOpenFuturePlans,
-  currentSelectedMonthKey
+  currentSelectedMonthKey,
+  onAddToCalendar
 }) => {
   const [filter, setFilter] = useState<'all' | 'unpaid' | 'paid'>('all');
 
@@ -336,10 +338,24 @@ export const CardsView: React.FC<CardsViewProps> = ({
                 )}
 
                 {/* Dates & Limit Info */}
-                <div className="flex justify-between items-center text-xs text-white/80 font-medium mb-3">
+                <div className="flex justify-between items-center text-xs text-white/80 font-medium mb-3 gap-2">
                   <div>
                     Son Ödeme Günü: <strong className="text-white">Her ayın {card.dueDay}. günü</strong>
                   </div>
+                  {onAddToCalendar && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToCalendar(card);
+                      }}
+                      className="px-2.5 py-1 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-[11px] font-bold flex items-center gap-1 transition active:scale-95 shrink-0 cursor-pointer"
+                      title="Ödeme tarihini Google Takvim'e ekle"
+                    >
+                      <CalendarPlus className="w-3.5 h-3.5 text-blue-300" />
+                      <span>Google Takvim</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Limit Progress Bar */}

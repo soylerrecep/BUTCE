@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Landmark, Plus, CheckCircle2, Edit3, Trash2, Calendar, TrendingDown, Layers, Lightbulb, ChevronRight } from 'lucide-react';
+import { Landmark, Plus, CheckCircle2, Edit3, Trash2, Calendar, TrendingDown, Layers, Lightbulb, ChevronRight, CalendarPlus } from 'lucide-react';
 import { Loan } from '../types';
 import { formatCurrency, getDueDateLabel } from '../utils/formatters';
 
@@ -10,6 +10,7 @@ interface LoansViewProps {
   onEditLoan: (loan: Loan) => void;
   onDeleteLoan: (id: string) => void;
   onOpenAdvisor?: (targetId?: string) => void;
+  onAddToCalendar?: (loan: Loan) => void;
 }
 
 export const LoansView: React.FC<LoansViewProps> = ({
@@ -18,7 +19,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
   onOpenAddModal,
   onEditLoan,
   onDeleteLoan,
-  onOpenAdvisor
+  onOpenAdvisor,
+  onAddToCalendar
 }) => {
   const [filter, setFilter] = useState<'all' | 'unpaid' | 'paid'>('all');
 
@@ -147,6 +149,19 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-1">
+                    {onAddToCalendar && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddToCalendar(loan);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-emerald-500 transition cursor-pointer"
+                        title="Telefon Takvimine Ekle"
+                      >
+                        <CalendarPlus className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

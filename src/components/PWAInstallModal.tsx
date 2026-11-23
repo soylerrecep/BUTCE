@@ -112,7 +112,6 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
             </ol>
           </div>
         ) : (
-          /* Chrome on Android Manual Guide (when beforeinstallprompt is not directly fired yet or in standard mobile Chrome) */
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3.5 space-y-2.5 text-left">
             <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
               <MoreVertical className="w-4 h-4" />
